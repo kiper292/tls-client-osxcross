@@ -10,7 +10,7 @@ Building osxcross from source takes several minutes. This repository provides pr
 
 ## Download
 
-Download the latest release tarball from the [Releases](https://github.com/kiper292/tls-client-osxcross/releases) page.
+Download the latest release tarball from the [Releases](https://github.com/kiper292/osxcross-prebuilt/releases) page.
 
 ## Requirements
 
@@ -24,7 +24,7 @@ In GitHub Actions:
 ```yaml
 - name: Download osxcross
   run: |
-    URL=$(curl -sSL https://api.github.com/repos/kiper292/tls-client-osxcross/releases/latest | jq -r '.assets[] | select(.name | endswith(".tar.gz")) | .browser_download_url')
+    URL=$(curl -sSL https://api.github.com/repos/kiper292/osxcross-prebuilt/releases/latest | jq -r '.assets[] | select(.name | endswith(".tar.gz")) | .browser_download_url')
     curl -sL "$URL" -o osxcross-target.tar.gz
     tar -xzf osxcross-target.tar.gz -C $HOME
     echo "$HOME/osxcross/target/bin" >> $GITHUB_PATH
@@ -36,7 +36,7 @@ Or if you need a specific version:
 - name: Download osxcross
   run: |
     VERSION=v1.0.0
-    URL=$(curl -sSL "https://api.github.com/repos/kiper292/tls-client-osxcross/releases/tags/$VERSION" | jq -r '.assets[] | select(.name | endswith(".tar.gz")) | .browser_download_url')
+    URL=$(curl -sSL "https://api.github.com/repos/kiper292/osxcross-prebuilt/releases/tags/$VERSION" | jq -r '.assets[] | select(.name | endswith(".tar.gz")) | .browser_download_url')
     curl -sL "$URL" -o osxcross-target.tar.gz
     tar -xzf osxcross-target.tar.gz -C $HOME
     echo "$HOME/osxcross/target/bin" >> $GITHUB_PATH
