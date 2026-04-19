@@ -44,7 +44,11 @@ jobs:
         id: sdk-notes
         run: |
           NOTES=$(curl -sSL "https://api.github.com/repos/joseluisq/macosx-sdks/releases/tags/15.0" | jq -r '.body // empty')
-          echo "NOTES=$NOTES" >> $GITHUB_OUTPUT
+          {
+            echo "NOTES<<EOF"
+            echo "$NOTES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Download macOS SDK
         run: |
