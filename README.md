@@ -12,6 +12,11 @@ Building osxcross from source takes several minutes. This repository provides pr
 
 Download the latest release tarball from the [Releases](https://github.com/kiper292/tls-client-osxcross/releases) page.
 
+## Requirements
+
+- Linux x86_64 (tested on Ubuntu 24.04 on GitHub Actions)
+- macOS SDK: 15.0
+
 ## Usage
 
 In GitHub Actions:
