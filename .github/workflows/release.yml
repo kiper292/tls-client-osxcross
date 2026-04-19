@@ -38,7 +38,13 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake git patch python3 libssl-dev lzma-dev libxml2-dev xz-utils bzip2 cpio libbz2-dev zlib1g-dev wget
+          sudo apt-get install -y clang cmake git patch python3 libssl-dev lzma-dev libxml2-dev xz-utils bzip2 cpio libbz2-dev zlib1g-dev wget jq
+
+      - name: Get macOS SDK release notes
+        id: sdk-notes
+        run: |
+          NOTES=$(curl -sSL "https://api.github.com/repos/joseluisq/macosx-sdks/releases/tags/15.0" | jq -r '.body // empty')
+          echo "NOTES=$NOTES" >> $GITHUB_OUTPUT
 
       - name: Download macOS SDK
         run: |
@@ -72,7 +78,15 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.VERSION }}
           name: ${{ steps.version.outputs.VERSION }}
-          body: 'Pre-built osxcross target directory for cross-compiling macOS binaries.'
+          body: |
+            Pre-built osxcross target directory for cross-compiling macOS binaries on Linux.
+
+            **Details:**
+            - osxcross: latest (cloned at build time)
+
+            ## macOS SDK 15.0 Release Notes
+
+            ${{ steps.sdk-notes.outputs.NOTES }}
           files: osxcross-*-target.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
