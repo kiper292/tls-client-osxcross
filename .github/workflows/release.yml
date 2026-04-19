@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: false
+        type: string
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          if ! echo "$VERSION" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Version must match format v*.*.*"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake git patch python3 libssl-dev lzma-dev libxml2-dev xz-utils bzip2 cpio libbz2-dev zlib1g-dev wget
+
+      - name: Download macOS SDK
+        run: |
+          cd /tmp
+          wget -q https://github.com/joseluisq/macosx-sdks/releases/download/15.0/MacOSX15.0.sdk.tar.xz
+
+      - name: Clone osxcross
+        run: |
+          cd $HOME
+          git clone --depth 1 https://github.com/tpoechtrager/osxcross.git
+          cd osxcross
+
+      - name: Move SDK to tarballs
+        run: |
+          cd $HOME/osxcross
+          mkdir -p tarballs
+          mv /tmp/MacOSX15.0.sdk.tar.xz tarballs/
+
+      - name: Build osxcross
+        run: |
+          cd $HOME/osxcross
+          UNATTENDED=1 ./build.sh
+
+      - name: Create tarball
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          tar -czvf osxcross-$VERSION-target.tar.gz -C $HOME osxcross/target
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: ${{ steps.version.outputs.VERSION }}
+          body: 'Pre-built osxcross target directory for cross-compiling macOS binaries.'
+          files: osxcross-*-target.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
